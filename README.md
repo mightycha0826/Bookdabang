@@ -1,0 +1,59 @@
+# BOOK 다방
+
+학교 카페 "BOOK 다방"을 위한 음료 주문/관리 웹앱. SvelteKit + Supabase.
+
+- 손님 페이지 (`/`): 메뉴 조회, 장바구니, 주문
+- 주문 상태 페이지 (`/order/[id]`): 실시간 주문 상태 + 관리자 "호출" 시 풀스크린 강제 알림
+- 관리자 페이지 (`/admin`): PIN 로그인, 실시간 주문 현황, 호출/완료 처리
+- 메뉴 관리 (`/admin/menu`): 메뉴 CRUD, 품절 토글
+
+## 1. Supabase 프로젝트 준비
+
+1. [supabase.com](https://supabase.com)에서 새 프로젝트를 만든다.
+2. 프로젝트의 **SQL Editor**에서 [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) 내용을 그대로 실행한다. (테이블, RLS 정책, Realtime publication이 함께 설정됨)
+3. **Project Settings → API**에서 다음 값을 확인한다.
+   - `Project URL` → `PUBLIC_SUPABASE_URL`
+   - `anon public` 키 → `PUBLIC_SUPABASE_ANON_KEY`
+   - `service_role` 키 → `SUPABASE_SERVICE_ROLE_KEY` (절대 외부에 노출 금지, 서버에서만 사용)
+
+## 2. 환경 변수 설정
+
+`.env.example`을 복사해 `.env`를 만들고 값을 채운다.
+
+```sh
+cp .env.example .env
+```
+
+```
+PUBLIC_SUPABASE_URL=          # Supabase 프로젝트 URL
+PUBLIC_SUPABASE_ANON_KEY=     # anon public 키
+SUPABASE_SERVICE_ROLE_KEY=    # service_role 키 (서버 전용)
+ADMIN_PIN=                    # 관리자 로그인 PIN (원하는 숫자/문자열)
+ADMIN_SESSION_SECRET=         # 관리자 로그인 세션 쿠키 서명용 임의의 긴 문자열
+```
+
+## 3. 로컬 실행
+
+```sh
+npm install
+npm run dev -- --open
+```
+
+- 손님 화면: `http://localhost:5173/`
+- 관리자 화면: `http://localhost:5173/admin/login` (`.env`의 `ADMIN_PIN`으로 로그인)
+
+## 4. 동작 흐름
+
+1. 손님이 메뉴를 담고 닉네임을 입력해 주문 → `/order/[id]`로 이동, 픽업 번호 확인.
+2. 손님이 "준비 완료 알림 받기"를 눌러 알림을 활성화하고 화면을 열어둔다.
+3. 관리자가 `/admin`에서 주문을 확인하고 "제조 시작" → 완료되면 "호출" 클릭.
+4. 손님 화면에 실시간으로 풀스크린 알림(소리+진동+화면)이 뜨고, "확인했어요"를 눌러야 닫힌다.
+5. 손님이 픽업하면 관리자가 "수령 완료"를 클릭한다.
+
+메뉴 품절/판매 재개는 `/admin/menu`에서 토글하면 손님 화면에 즉시 반영된다(새로고침 또는 재방문 시).
+
+## 배포
+
+기본 어댑터는 `@sveltejs/adapter-auto`. Vercel/Node 등 배포 환경에 맞춰 필요하면 `svelte.config.js`의 어댑터를 교체한다 (예: Cloudflare Pages를 쓴다면 `@sveltejs/adapter-cloudflare` 설치 후 교체).
+
+배포 환경에도 위 환경 변수(`PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_PIN`, `ADMIN_SESSION_SECRET`)를 동일하게 설정해야 한다.

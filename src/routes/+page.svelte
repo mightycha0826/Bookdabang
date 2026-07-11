@@ -1,0 +1,153 @@
+<script lang="ts">
+	import MenuCard from '$lib/components/MenuCard.svelte';
+	import CartBar from '$lib/components/CartBar.svelte';
+	import type { PageProps } from './$types';
+
+	let { data, form }: PageProps = $props();
+
+	let hasTumbler = $state<boolean | null>(null);
+	let activeCategory = $state('전체');
+	let quantities = $state<Record<string, number>>({});
+
+	const categoryNames = $derived.by(() => {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- local, non-reactive helper set, discarded after this computation
+		const seen = new Set<string>();
+		const ordered: string[] = [];
+		for (const item of data.menuItems) {
+			if (!seen.has(item.category)) {
+				seen.add(item.category);
+				ordered.push(item.category);
+			}
+		}
+		return ordered;
+	});
+
+	const visibleItems = $derived(
+		activeCategory === '전체'
+			? data.menuItems
+			: data.menuItems.filter((item) => item.category === activeCategory)
+	);
+
+	const cartItems = $derived(
+		Object.entries(quantities)
+			.filter(([, qty]) => qty > 0)
+			.map(([menuItemId, quantity]) => ({ menuItemId, quantity }))
+	);
+
+	const totalCount = $derived(cartItems.reduce((sum, i) => sum + i.quantity, 0));
+
+	const totalPrice = $derived(
+		cartItems.reduce((sum, i) => {
+			const item = data.menuItems.find((m) => m.id === i.menuItemId);
+			return sum + (item ? item.price * i.quantity : 0);
+		}, 0)
+	);
+
+	function increase(id: string) {
+		quantities[id] = (quantities[id] ?? 0) + 1;
+	}
+
+	function decrease(id: string) {
+		if (!quantities[id]) return;
+		quantities[id] = Math.max(0, quantities[id] - 1);
+	}
+</script>
+
+<svelte:head>
+	<title>BOOK 다방</title>
+</svelte:head>
+
+{#if hasTumbler === null}
+	<div class="flex min-h-dvh flex-col items-center justify-center gap-10 bg-white p-6 text-center">
+		<div>
+			<p class="text-sm font-medium tracking-widest text-stone-400">BOOK 다방</p>
+			<h1 class="mt-2 text-xl font-bold text-stone-900">텀블러를 가지고 오셨나요?</h1>
+		</div>
+
+		<div class="flex w-full max-w-md flex-col gap-3 sm:flex-row">
+			<button
+				type="button"
+				onclick={() => (hasTumbler = true)}
+				class="flex-1 rounded-2xl border border-stone-200 bg-stone-50 px-6 py-10 text-base font-semibold text-stone-900 hover:border-stone-400"
+			>
+				텀블러를 가지고 있어요
+			</button>
+			<button
+				type="button"
+				onclick={() => (hasTumbler = false)}
+				class="flex-1 rounded-2xl border border-stone-200 bg-stone-50 px-6 py-10 text-base font-semibold text-stone-900 hover:border-stone-400"
+			>
+				텀블러가 없어요
+			</button>
+		</div>
+	</div>
+{:else}
+	<div class="min-h-dvh bg-white pb-32">
+		<header class="sticky top-0 z-20 border-b border-stone-200 bg-white/95 backdrop-blur">
+			<div class="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+				<div>
+					<p class="text-sm font-medium tracking-widest text-stone-400">BOOK 다방</p>
+					<h1 class="text-base font-bold text-stone-900">메뉴</h1>
+				</div>
+				<button
+					type="button"
+					onclick={() => (hasTumbler = null)}
+					class="rounded-full border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600"
+				>
+					{hasTumbler ? '개인 텀블러' : '일회용 컵'} · 변경
+				</button>
+			</div>
+
+			{#if categoryNames.length > 0}
+				<nav class="mx-auto flex max-w-4xl gap-2 overflow-x-auto px-4 pb-3">
+					<button
+						type="button"
+						onclick={() => (activeCategory = '전체')}
+						class="shrink-0 rounded-full px-4 py-1.5 text-sm font-medium {activeCategory === '전체'
+							? 'bg-stone-900 text-white'
+							: 'bg-stone-100 text-stone-600'}"
+					>
+						전체
+					</button>
+					{#each categoryNames as category (category)}
+						<button
+							type="button"
+							onclick={() => (activeCategory = category)}
+							class="shrink-0 rounded-full px-4 py-1.5 text-sm font-medium {activeCategory ===
+							category
+								? 'bg-stone-900 text-white'
+								: 'bg-stone-100 text-stone-600'}"
+						>
+							{category}
+						</button>
+					{/each}
+				</nav>
+			{/if}
+		</header>
+
+		{#if form?.message}
+			<p class="mx-auto mt-4 max-w-4xl rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+				{form.message}
+			</p>
+		{/if}
+
+		<main class="mx-auto max-w-4xl p-4">
+			{#if data.menuItems.length === 0}
+				<p class="py-16 text-center text-stone-400">아직 등록된 메뉴가 없습니다.</p>
+			{:else}
+				<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+					{#each visibleItems as item (item.id)}
+						<MenuCard
+							{item}
+							quantity={quantities[item.id] ?? 0}
+							onIncrease={() => increase(item.id)}
+							onDecrease={() => decrease(item.id)}
+						/>
+					{/each}
+				</div>
+			{/if}
+		</main>
+	</div>
+
+	<CartBar items={cartItems} {totalCount} {totalPrice} hasTumbler={hasTumbler ?? false} />
+{/if}
