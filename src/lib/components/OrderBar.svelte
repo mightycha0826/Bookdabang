@@ -142,12 +142,6 @@
 				<h2 class="text-base font-bold text-stone-900">학번 · 이름 입력</h2>
 				<p class="mt-1 text-sm text-stone-500">학번 5자리와 이름을 입력해주세요.</p>
 
-				<p
-					class="mt-3 inline-block rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-600"
-				>
-					{hasTumbler ? '개인 텀블러 사용' : '일회용 컵 사용'}
-				</p>
-
 				<input
 					type="text"
 					bind:value={studentId}

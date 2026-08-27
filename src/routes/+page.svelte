@@ -9,7 +9,7 @@
 	let { data, form }: PageProps = $props();
 
 	let storeOpen = $state(data.storeOpen);
-	let hasTumbler = $state<boolean | null>(null);
+	const hasTumbler = false;
 	let activeCategory = $state('전체');
 	let selectedItemId = $state<string | null>(null);
 
@@ -66,30 +66,6 @@
 		<h1 class="text-xl font-bold text-stone-900">지금은 주문을 받지 않습니다</h1>
 		<p class="text-sm text-stone-500">잠시 후 다시 확인해주세요.</p>
 	</div>
-{:else if hasTumbler === null}
-	<div class="flex min-h-dvh flex-col items-center justify-center gap-10 bg-white p-6 text-center">
-		<div>
-			<p class="text-sm font-medium tracking-widest text-stone-400">BOOK 다방</p>
-			<h1 class="mt-2 text-xl font-bold text-stone-900">텀블러를 가지고 오셨나요?</h1>
-		</div>
-
-		<div class="flex w-full max-w-md flex-col gap-3 sm:flex-row">
-			<button
-				type="button"
-				onclick={() => (hasTumbler = true)}
-				class="flex-1 rounded-2xl border border-stone-200 bg-stone-50 px-6 py-10 text-base font-semibold text-stone-900 hover:border-stone-400"
-			>
-				텀블러를 가지고 있어요
-			</button>
-			<button
-				type="button"
-				onclick={() => (hasTumbler = false)}
-				class="flex-1 rounded-2xl border border-stone-200 bg-stone-50 px-6 py-10 text-base font-semibold text-stone-900 hover:border-stone-400"
-			>
-				텀블러가 없어요
-			</button>
-		</div>
-	</div>
 {:else}
 	<div class="min-h-dvh bg-white pb-32">
 		<header class="sticky top-0 z-20 border-b border-stone-200 bg-white/95 backdrop-blur">
@@ -101,7 +77,6 @@
 				<button
 					type="button"
 					onclick={() => {
-						hasTumbler = null;
 						selectedItemId = null;
 						activeCategory = '전체';
 					}}
@@ -161,5 +136,5 @@
 		</main>
 	</div>
 
-	<OrderBar {selectedItem} hasTumbler={hasTumbler ?? false} />
+	<OrderBar {selectedItem} {hasTumbler} />
 {/if}
