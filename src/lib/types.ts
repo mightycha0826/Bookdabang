@@ -20,6 +20,7 @@ export interface Order {
 	has_tumbler: boolean;
 	menu_item_id: string | null;
 	menu_name: string;
+	is_refill: boolean;
 	status: OrderStatus;
 	notified_at: string | null;
 	created_at: string;

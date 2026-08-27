@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { supabase } from '$lib/supabase';
+	import type { Order } from '$lib/types';
 
 	let {
 		selectedItem,
@@ -23,27 +25,90 @@
 		dialogOpen = false;
 		step = 'info';
 	}
+
+	let refillDialogOpen = $state(false);
+	let refillStep = $state<'table' | 'result'>('table');
+	let refillTableNumber = $state<number | null>(null);
+	let lookupLoading = $state(false);
+	let previousOrder = $state<Order | null>(null);
+	let refillCount = $state(0);
+	let refillSubmitting = $state(false);
+
+	function openRefillDialog() {
+		refillDialogOpen = true;
+		refillStep = 'table';
+		refillTableNumber = null;
+		previousOrder = null;
+		refillCount = 0;
+	}
+
+	function closeRefillDialog() {
+		refillDialogOpen = false;
+		refillStep = 'table';
+		refillTableNumber = null;
+		previousOrder = null;
+		refillCount = 0;
+	}
+
+	async function lookupTable(n: number) {
+		refillTableNumber = n;
+		lookupLoading = true;
+
+		const { data: rows } = await supabase
+			.from('orders')
+			.select('*')
+			.eq('table_number', n)
+			.order('created_at', { ascending: false })
+			.limit(1);
+
+		previousOrder = (rows?.[0] as Order | undefined) ?? null;
+
+		if (previousOrder) {
+			const { data: refillRows } = await supabase
+				.from('orders')
+				.select('id')
+				.eq('table_number', n)
+				.eq('is_refill', true);
+			refillCount = refillRows?.length ?? 0;
+		} else {
+			refillCount = 0;
+		}
+
+		lookupLoading = false;
+		refillStep = 'result';
+	}
 </script>
 
-{#if selectedItem}
-	<div
-		class="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white/95 p-3 backdrop-blur"
-	>
-		<div class="mx-auto flex max-w-4xl items-center justify-between gap-3">
-			<div>
+<div class="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white/95 p-3 backdrop-blur">
+	<div class="mx-auto flex max-w-4xl items-center justify-between gap-3">
+		<div>
+			{#if selectedItem}
 				<p class="text-xs text-stone-500">선택한 음료</p>
 				<p class="text-lg font-bold text-stone-900">{selectedItem.name}</p>
-			</div>
+			{:else}
+				<p class="text-sm text-stone-400">음료를 선택해주세요</p>
+			{/if}
+		</div>
+		<div class="flex gap-2">
 			<button
 				type="button"
-				onclick={() => (dialogOpen = true)}
-				class="rounded-lg bg-stone-900 px-8 py-3 text-sm font-semibold text-white"
+				onclick={openRefillDialog}
+				class="rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white"
 			>
-				주문하기
+				리필하기
 			</button>
+			{#if selectedItem}
+				<button
+					type="button"
+					onclick={() => (dialogOpen = true)}
+					class="rounded-lg bg-stone-900 px-8 py-3 text-sm font-semibold text-white"
+				>
+					주문하기
+				</button>
+			{/if}
 		</div>
 	</div>
-{/if}
+</div>
 
 {#if dialogOpen && selectedItem}
 	<div class="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
@@ -148,6 +213,104 @@
 						</button>
 					</div>
 				</form>
+			{/if}
+		</div>
+	</div>
+{/if}
+
+{#if refillDialogOpen}
+	<div class="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
+		<div class="w-full max-w-sm rounded-t-2xl bg-white p-5 sm:rounded-2xl">
+			{#if refillStep === 'table'}
+				<h2 class="text-base font-bold text-stone-900">리필 · 테이블 번호 선택</h2>
+				<p class="mt-1 text-sm text-stone-500">이전에 주문하셨던 테이블 번호를 선택해주세요.</p>
+
+				<div class="mt-4 grid grid-cols-5 gap-2">
+					{#each Array.from({ length: 10 }, (_, i) => i + 1) as n (n)}
+						<button
+							type="button"
+							disabled={lookupLoading}
+							onclick={() => lookupTable(n)}
+							class="rounded-lg border border-stone-300 py-3 text-sm font-semibold text-stone-700 disabled:opacity-50"
+						>
+							{n}
+						</button>
+					{/each}
+				</div>
+
+				<button
+					type="button"
+					onclick={closeRefillDialog}
+					class="mt-4 w-full rounded-lg border border-stone-300 py-3 text-sm font-medium text-stone-700"
+				>
+					취소
+				</button>
+			{:else if previousOrder}
+				<h2 class="text-base font-bold text-stone-900">{refillTableNumber}번 테이블 이전 주문</h2>
+
+				<div class="mt-3 rounded-lg bg-stone-50 p-3 text-center">
+					<p class="text-sm text-stone-500">{previousOrder.name}님</p>
+					<p class="mt-1 text-lg font-semibold text-stone-900">{previousOrder.menu_name}</p>
+				</div>
+
+				{#if refillCount >= 1}
+					<p
+						class="mt-3 rounded-lg bg-orange-50 px-3 py-2 text-center text-sm font-medium text-orange-700"
+					>
+						2번 이상 리필 괜찮으신가요?
+					</p>
+				{/if}
+
+				<form
+					method="POST"
+					action="?/refill"
+					use:enhance={() => {
+						refillSubmitting = true;
+						return async ({ update }) => {
+							await update();
+							refillSubmitting = false;
+						};
+					}}
+				>
+					<input type="hidden" name="previousOrderId" value={previousOrder.id} />
+
+					<div class="mt-4 flex gap-2">
+						<button
+							type="button"
+							onclick={() => (refillStep = 'table')}
+							class="flex-1 rounded-lg border border-stone-300 py-3 text-sm font-medium text-stone-700"
+						>
+							뒤로
+						</button>
+						<button
+							type="submit"
+							disabled={refillSubmitting}
+							class="flex-1 rounded-lg bg-green-600 py-3 text-sm font-semibold text-white disabled:opacity-50"
+						>
+							{refillSubmitting ? '리필 중...' : '리필하기'}
+						</button>
+					</div>
+				</form>
+			{:else}
+				<h2 class="text-base font-bold text-stone-900">{refillTableNumber}번 테이블</h2>
+				<p class="mt-2 text-sm text-stone-500">이전 주문 내역을 찾을 수 없습니다.</p>
+
+				<div class="mt-4 flex gap-2">
+					<button
+						type="button"
+						onclick={() => (refillStep = 'table')}
+						class="flex-1 rounded-lg border border-stone-300 py-3 text-sm font-medium text-stone-700"
+					>
+						다른 테이블
+					</button>
+					<button
+						type="button"
+						onclick={closeRefillDialog}
+						class="flex-1 rounded-lg bg-stone-900 py-3 text-sm font-semibold text-white"
+					>
+						새로 주문하기
+					</button>
+				</div>
 			{/if}
 		</div>
 	</div>

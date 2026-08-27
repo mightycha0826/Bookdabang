@@ -88,5 +88,66 @@ export const actions: Actions = {
 		}
 
 		throw redirect(303, `/order/${order.id}`);
+	},
+
+	refill: async ({ request }) => {
+		const { data: statusData } = await supabase
+			.from('store_status')
+			.select('is_open')
+			.eq('id', 1)
+			.single();
+		if (statusData?.is_open === false) {
+			return fail(403, { message: '지금은 주문을 받지 않습니다.' });
+		}
+
+		const form = await request.formData();
+		const previousOrderId = form.get('previousOrderId')?.toString();
+		if (!previousOrderId) {
+			return fail(400, { message: '이전 주문 정보를 찾을 수 없습니다.' });
+		}
+
+		const { data: previousOrder, error: previousError } = await supabase
+			.from('orders')
+			.select('*')
+			.eq('id', previousOrderId)
+			.single();
+
+		if (previousError || !previousOrder) {
+			return fail(400, { message: '이전 주문 정보를 찾을 수 없습니다.' });
+		}
+
+		if (previousOrder.menu_item_id) {
+			const { data: menuItem } = await supabase
+				.from('menu_items')
+				.select('is_sold_out')
+				.eq('id', previousOrder.menu_item_id)
+				.single();
+			if (menuItem?.is_sold_out) {
+				return fail(400, {
+					message: `${previousOrder.menu_name}은(는) 품절되어 리필할 수 없습니다.`
+				});
+			}
+		}
+
+		const { data: order, error: orderError } = await supabase
+			.from('orders')
+			.insert({
+				student_id: previousOrder.student_id,
+				name: previousOrder.name,
+				table_number: previousOrder.table_number,
+				has_tumbler: previousOrder.has_tumbler,
+				menu_item_id: previousOrder.menu_item_id,
+				menu_name: previousOrder.menu_name,
+				is_refill: true
+			})
+			.select()
+			.single();
+
+		if (orderError || !order) {
+			console.error('리필 주문 생성 실패', orderError);
+			return fail(500, { message: '리필 주문을 생성하지 못했습니다. 다시 시도해주세요.' });
+		}
+
+		throw redirect(303, `/order/${order.id}`);
 	}
 };

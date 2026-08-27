@@ -38,10 +38,21 @@
 		<h2 class="mb-2 font-semibold text-stone-700">주문 접수 ({pending.length})</h2>
 		<div class="space-y-3">
 			{#each pending as order (order.id)}
-				<article class="rounded-xl bg-white p-4 shadow-sm">
+				<article
+					class="rounded-xl p-4 shadow-sm {order.is_refill
+						? 'border-2 border-green-500 bg-green-50'
+						: 'bg-white'}"
+				>
 					<div class="flex items-start justify-between">
 						<div>
-							<p class="text-lg font-extrabold text-stone-900">{order.table_number}번 테이블</p>
+							<div class="flex items-center gap-2">
+								<p class="text-lg font-extrabold text-stone-900">{order.table_number}번 테이블</p>
+								{#if order.is_refill}
+									<span class="rounded-full bg-green-600 px-2 py-0.5 text-xs font-bold text-white">
+										리필
+									</span>
+								{/if}
+							</div>
 							<p class="text-sm text-stone-600">
 								#{order.order_number} · {order.name} (학번 {order.student_id})
 							</p>
@@ -72,10 +83,21 @@
 		<h2 class="mb-2 font-semibold text-stone-700">픽업 대기 ({ready.length})</h2>
 		<div class="space-y-3">
 			{#each ready as order (order.id)}
-				<article class="rounded-xl bg-white p-4 shadow-sm">
+				<article
+					class="rounded-xl p-4 shadow-sm {order.is_refill
+						? 'border-2 border-green-500 bg-green-50'
+						: 'bg-white'}"
+				>
 					<div class="flex items-start justify-between">
 						<div>
-							<p class="text-lg font-extrabold text-stone-900">{order.table_number}번 테이블</p>
+							<div class="flex items-center gap-2">
+								<p class="text-lg font-extrabold text-stone-900">{order.table_number}번 테이블</p>
+								{#if order.is_refill}
+									<span class="rounded-full bg-green-600 px-2 py-0.5 text-xs font-bold text-white">
+										리필
+									</span>
+								{/if}
+							</div>
 							<p class="text-sm text-stone-600">
 								#{order.order_number} · {order.name} (학번 {order.student_id})
 							</p>
@@ -121,7 +143,7 @@
 			{#each data.completed as order (order.id)}
 				<div class="rounded-lg bg-white px-3 py-2 text-sm text-stone-500">
 					{order.table_number}번 테이블 · #{order.order_number} · {order.name} (학번 {order.student_id})
-					· {order.menu_name}
+					· {order.menu_name}{order.is_refill ? ' · 리필' : ''}
 				</div>
 			{/each}
 		</div>
