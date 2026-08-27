@@ -15,24 +15,22 @@ export const load: PageServerLoad = async () => {
 
 function parseMenuForm(formData: FormData) {
 	const name = formData.get('name')?.toString().trim();
-	const priceRaw = formData.get('price')?.toString();
 	const category = formData.get('category')?.toString().trim() || '기타';
 	const description = formData.get('description')?.toString().trim() || null;
 	const imageUrl = formData.get('imageUrl')?.toString().trim() || null;
-	const price = Number(priceRaw);
 
-	if (!name || !Number.isFinite(price) || price < 0) {
+	if (!name) {
 		return null;
 	}
 
-	return { name, price, category, description, image_url: imageUrl };
+	return { name, category, description, image_url: imageUrl };
 }
 
 export const actions: Actions = {
 	create: async ({ request }) => {
 		const formData = await request.formData();
 		const parsed = parseMenuForm(formData);
-		if (!parsed) return fail(400, { message: '이름과 가격을 올바르게 입력해주세요.' });
+		if (!parsed) return fail(400, { message: '메뉴 이름을 입력해주세요.' });
 
 		const { error } = await supabaseAdmin.from('menu_items').insert(parsed);
 		if (error) return fail(500, { message: '메뉴 추가에 실패했습니다.' });

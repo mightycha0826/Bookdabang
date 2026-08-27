@@ -42,18 +42,16 @@
 				<article class="rounded-xl bg-white p-4 shadow-sm">
 					<div class="flex items-start justify-between">
 						<div>
-							<p class="font-bold text-stone-900">#{order.order_number} · {order.customer_name}</p>
+							<p class="font-bold text-stone-900">
+								#{order.order_number} · 학번 {order.student_id}
+							</p>
 							<p class="text-xs text-stone-400">
 								{timeLabel(order.created_at)} · {order.has_tumbler ? '텀블러' : '일회용 컵'}
 							</p>
 						</div>
 						<OrderStatusBadge status={order.status} />
 					</div>
-					<ul class="mt-2 space-y-0.5 text-sm text-stone-600">
-						{#each order.order_items as item (item.id)}
-							<li>{item.menu_name} × {item.quantity}</li>
-						{/each}
-					</ul>
+					<p class="mt-2 text-sm text-stone-600">{order.menu_name}</p>
 					<form method="POST" action="?/startMaking" use:enhance class="mt-3">
 						<input type="hidden" name="orderId" value={order.id} />
 						<button
@@ -77,18 +75,16 @@
 				<article class="rounded-xl bg-white p-4 shadow-sm">
 					<div class="flex items-start justify-between">
 						<div>
-							<p class="font-bold text-stone-900">#{order.order_number} · {order.customer_name}</p>
+							<p class="font-bold text-stone-900">
+								#{order.order_number} · 학번 {order.student_id}
+							</p>
 							<p class="text-xs text-stone-400">
 								{timeLabel(order.created_at)} · {order.has_tumbler ? '텀블러' : '일회용 컵'}
 							</p>
 						</div>
 						<OrderStatusBadge status={order.status} />
 					</div>
-					<ul class="mt-2 space-y-0.5 text-sm text-stone-600">
-						{#each order.order_items as item (item.id)}
-							<li>{item.menu_name} × {item.quantity}</li>
-						{/each}
-					</ul>
+					<p class="mt-2 text-sm text-stone-600">{order.menu_name}</p>
 					<form method="POST" action="?/call" use:enhance class="mt-3">
 						<input type="hidden" name="orderId" value={order.id} />
 						<button
@@ -112,18 +108,16 @@
 				<article class="rounded-xl bg-white p-4 shadow-sm">
 					<div class="flex items-start justify-between">
 						<div>
-							<p class="font-bold text-stone-900">#{order.order_number} · {order.customer_name}</p>
+							<p class="font-bold text-stone-900">
+								#{order.order_number} · 학번 {order.student_id}
+							</p>
 							<p class="text-xs text-stone-400">
 								{timeLabel(order.created_at)} · {order.has_tumbler ? '텀블러' : '일회용 컵'}
 							</p>
 						</div>
 						<OrderStatusBadge status={order.status} />
 					</div>
-					<ul class="mt-2 space-y-0.5 text-sm text-stone-600">
-						{#each order.order_items as item (item.id)}
-							<li>{item.menu_name} × {item.quantity}</li>
-						{/each}
-					</ul>
+					<p class="mt-2 text-sm text-stone-600">{order.menu_name}</p>
 					<div class="mt-3 flex gap-2">
 						<form method="POST" action="?/call" use:enhance class="flex-1">
 							<input type="hidden" name="orderId" value={order.id} />
@@ -158,9 +152,7 @@
 		<div class="mt-2 space-y-2">
 			{#each data.completed as order (order.id)}
 				<div class="rounded-lg bg-white px-3 py-2 text-sm text-stone-500">
-					#{order.order_number} · {order.customer_name} · {order.order_items
-						.map((i) => i.menu_name)
-						.join(', ')}
+					#{order.order_number} · 학번 {order.student_id} · {order.menu_name}
 				</div>
 			{/each}
 		</div>

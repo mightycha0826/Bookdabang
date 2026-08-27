@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { supabase } from '$lib/supabase';
 	import MenuCard from '$lib/components/MenuCard.svelte';
-	import CartBar from '$lib/components/CartBar.svelte';
+	import OrderBar from '$lib/components/OrderBar.svelte';
 	import type { StoreStatus } from '$lib/types';
 	import type { PageProps } from './$types';
 
@@ -11,7 +11,7 @@
 	let storeOpen = $state(data.storeOpen);
 	let hasTumbler = $state<boolean | null>(null);
 	let activeCategory = $state('전체');
-	let quantities = $state<Record<string, number>>({});
+	let selectedItemId = $state<string | null>(null);
 
 	const categoryNames = $derived.by(() => {
 		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- local, non-reactive helper set, discarded after this computation
@@ -32,28 +32,10 @@
 			: data.menuItems.filter((item) => item.category === activeCategory)
 	);
 
-	const cartItems = $derived(
-		Object.entries(quantities)
-			.filter(([, qty]) => qty > 0)
-			.map(([menuItemId, quantity]) => ({ menuItemId, quantity }))
-	);
+	const selectedItem = $derived(data.menuItems.find((item) => item.id === selectedItemId) ?? null);
 
-	const totalCount = $derived(cartItems.reduce((sum, i) => sum + i.quantity, 0));
-
-	const totalPrice = $derived(
-		cartItems.reduce((sum, i) => {
-			const item = data.menuItems.find((m) => m.id === i.menuItemId);
-			return sum + (item ? item.price * i.quantity : 0);
-		}, 0)
-	);
-
-	function increase(id: string) {
-		quantities[id] = (quantities[id] ?? 0) + 1;
-	}
-
-	function decrease(id: string) {
-		if (!quantities[id]) return;
-		quantities[id] = Math.max(0, quantities[id] - 1);
+	function toggleSelect(id: string) {
+		selectedItemId = selectedItemId === id ? null : id;
 	}
 
 	onMount(() => {
@@ -166,9 +148,8 @@
 					{#each visibleItems as item (item.id)}
 						<MenuCard
 							{item}
-							quantity={quantities[item.id] ?? 0}
-							onIncrease={() => increase(item.id)}
-							onDecrease={() => decrease(item.id)}
+							selected={selectedItemId === item.id}
+							onSelect={() => toggleSelect(item.id)}
 						/>
 					{/each}
 				</div>
@@ -176,5 +157,5 @@
 		</main>
 	</div>
 
-	<CartBar items={cartItems} {totalCount} {totalPrice} hasTumbler={hasTumbler ?? false} />
+	<OrderBar {selectedItem} hasTumbler={hasTumbler ?? false} />
 {/if}

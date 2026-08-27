@@ -3,18 +3,20 @@
 
 	let {
 		item,
-		quantity,
-		onIncrease,
-		onDecrease
+		selected,
+		onSelect
 	}: {
 		item: MenuItem;
-		quantity: number;
-		onIncrease: () => void;
-		onDecrease: () => void;
+		selected: boolean;
+		onSelect: () => void;
 	} = $props();
 </script>
 
-<div class="flex flex-col overflow-hidden rounded-2xl border border-stone-200 bg-white">
+<div
+	class="flex flex-col overflow-hidden rounded-2xl border bg-white {selected
+		? 'border-stone-900'
+		: 'border-stone-200'}"
+>
 	<div class="relative aspect-square w-full bg-stone-100">
 		{#if item.image_url}
 			<img src={item.image_url} alt={item.name} class="size-full object-cover" loading="lazy" />
@@ -36,32 +38,18 @@
 	</div>
 
 	<div class="flex flex-1 flex-col gap-2 p-3">
-		<div class="min-w-0">
-			<h3 class="truncate text-sm font-medium text-stone-900">{item.name}</h3>
-			<p class="mt-0.5 text-sm font-semibold text-stone-900">{item.price.toLocaleString()}원</p>
-		</div>
+		<h3 class="truncate text-sm font-medium text-stone-900">{item.name}</h3>
 
 		{#if !item.is_sold_out}
-			<div class="mt-auto flex items-center justify-between">
-				<button
-					type="button"
-					onclick={onDecrease}
-					disabled={quantity === 0}
-					class="flex size-7 items-center justify-center rounded-full border border-stone-300 text-stone-500 disabled:opacity-30"
-					aria-label="수량 감소"
-				>
-					−
-				</button>
-				<span class="text-sm tabular-nums text-stone-700">{quantity}</span>
-				<button
-					type="button"
-					onclick={onIncrease}
-					class="flex size-7 items-center justify-center rounded-full bg-stone-900 text-white"
-					aria-label="수량 증가"
-				>
-					+
-				</button>
-			</div>
+			<button
+				type="button"
+				onclick={onSelect}
+				class="mt-auto rounded-full py-2 text-sm font-semibold {selected
+					? 'bg-stone-900 text-white'
+					: 'border border-stone-300 text-stone-700'}"
+			>
+				{selected ? '선택됨' : '선택'}
+			</button>
 		{/if}
 	</div>
 </div>

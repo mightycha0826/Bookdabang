@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { supabaseAdmin } from '$lib/server/supabaseAdmin';
-import type { Order, OrderItem, OrderWithItems } from '$lib/types';
+import type { Order } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -9,24 +9,11 @@ export const load: PageServerLoad = async () => {
 		.select('*')
 		.order('created_at', { ascending: true });
 
-	const { data: items } = await supabaseAdmin.from('order_items').select('*');
-
-	const itemsByOrder = new Map<string, OrderItem[]>();
-	for (const item of (items ?? []) as OrderItem[]) {
-		const list = itemsByOrder.get(item.order_id) ?? [];
-		list.push(item);
-		itemsByOrder.set(item.order_id, list);
-	}
-
 	const allOrders = (orders ?? []) as Order[];
-	const withItems: OrderWithItems[] = allOrders.map((order) => ({
-		...order,
-		order_items: itemsByOrder.get(order.id) ?? []
-	}));
 
 	return {
-		active: withItems.filter((o) => o.status !== 'completed'),
-		completed: withItems
+		active: allOrders.filter((o) => o.status !== 'completed'),
+		completed: allOrders
 			.filter((o) => o.status === 'completed')
 			.slice(-10)
 			.reverse()

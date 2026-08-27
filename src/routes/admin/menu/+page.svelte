@@ -32,17 +32,9 @@
 			class="rounded-lg border border-stone-300 px-3 py-2"
 		/>
 		<input
-			name="price"
-			type="number"
-			min="0"
-			required
-			placeholder="가격"
-			class="rounded-lg border border-stone-300 px-3 py-2"
-		/>
-		<input
 			name="imageUrl"
 			placeholder="이미지 URL (선택)"
-			class="rounded-lg border border-stone-300 px-3 py-2"
+			class="rounded-lg border border-stone-300 px-3 py-2 sm:col-span-2"
 		/>
 		<input
 			name="description"
@@ -86,18 +78,10 @@
 						class="rounded-lg border border-stone-300 px-3 py-2"
 					/>
 					<input
-						name="price"
-						type="number"
-						min="0"
-						required
-						value={item.price}
-						class="rounded-lg border border-stone-300 px-3 py-2"
-					/>
-					<input
 						name="imageUrl"
 						value={item.image_url ?? ''}
 						placeholder="이미지 URL"
-						class="rounded-lg border border-stone-300 px-3 py-2"
+						class="rounded-lg border border-stone-300 px-3 py-2 sm:col-span-2"
 					/>
 					<input
 						name="description"
@@ -138,7 +122,6 @@
 						{#if item.description}
 							<p class="text-sm text-stone-500">{item.description}</p>
 						{/if}
-						<p class="mt-1 font-medium text-amber-800">{item.price.toLocaleString()}원</p>
 					</div>
 
 					<div class="flex shrink-0 flex-col items-end gap-2">
