@@ -1,4 +1,4 @@
-export type OrderStatus = 'pending' | 'making' | 'ready' | 'completed';
+export type OrderStatus = 'pending' | 'ready' | 'completed';
 
 export interface MenuItem {
 	id: string;
@@ -31,7 +31,6 @@ export interface StoreStatus {
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
 	pending: '주문 접수',
-	making: '제조 중',
 	ready: '픽업 대기',
 	completed: '수령 완료'
 };

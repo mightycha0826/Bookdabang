@@ -1,5 +1,8 @@
 -- BOOK 다방 영업 상태(수동 온/오프)
 
+-- 이전에 중간까지만 실행되고 실패한 시도가 남긴 객체가 있으면 정리(처음 실행이면 아무 효과 없음)
+drop table if exists store_status cascade;
+
 create table store_status (
   id integer primary key default 1 check (id = 1),
   is_open boolean not null default true,

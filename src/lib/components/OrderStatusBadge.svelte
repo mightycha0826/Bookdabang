@@ -5,7 +5,6 @@
 
 	const colors: Record<OrderStatus, string> = {
 		pending: 'bg-stone-200 text-stone-700',
-		making: 'bg-blue-100 text-blue-700',
 		ready: 'bg-amber-100 text-amber-800',
 		completed: 'bg-green-100 text-green-700'
 	};

@@ -26,17 +26,6 @@ function getOrderId(formData: FormData) {
 }
 
 export const actions: Actions = {
-	startMaking: async ({ request }) => {
-		const orderId = getOrderId(await request.formData());
-		if (!orderId) return fail(400, { message: '주문 ID가 없습니다.' });
-
-		const { error } = await supabaseAdmin
-			.from('orders')
-			.update({ status: 'making' })
-			.eq('id', orderId);
-		if (error) return fail(500, { message: '상태 변경에 실패했습니다.' });
-	},
-
 	call: async ({ request }) => {
 		const orderId = getOrderId(await request.formData());
 		if (!orderId) return fail(400, { message: '주문 ID가 없습니다.' });

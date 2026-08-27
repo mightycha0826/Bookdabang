@@ -9,7 +9,6 @@
 	let { data }: PageProps = $props();
 
 	const pending = $derived(data.active.filter((o) => o.status === 'pending'));
-	const making = $derived(data.active.filter((o) => o.status === 'making'));
 	const ready = $derived(data.active.filter((o) => o.status === 'ready'));
 
 	onMount(() => {
@@ -34,44 +33,11 @@
 	<title>주문 현황 — BOOK 다방 관리자</title>
 </svelte:head>
 
-<div class="grid gap-4 sm:grid-cols-3">
+<div class="grid gap-4 sm:grid-cols-2">
 	<section>
 		<h2 class="mb-2 font-semibold text-stone-700">주문 접수 ({pending.length})</h2>
 		<div class="space-y-3">
 			{#each pending as order (order.id)}
-				<article class="rounded-xl bg-white p-4 shadow-sm">
-					<div class="flex items-start justify-between">
-						<div>
-							<p class="font-bold text-stone-900">
-								#{order.order_number} · 학번 {order.student_id}
-							</p>
-							<p class="text-xs text-stone-400">
-								{timeLabel(order.created_at)} · {order.has_tumbler ? '텀블러' : '일회용 컵'}
-							</p>
-						</div>
-						<OrderStatusBadge status={order.status} />
-					</div>
-					<p class="mt-2 text-sm text-stone-600">{order.menu_name}</p>
-					<form method="POST" action="?/startMaking" use:enhance class="mt-3">
-						<input type="hidden" name="orderId" value={order.id} />
-						<button
-							type="submit"
-							class="w-full rounded-full bg-blue-600 py-2 text-sm font-semibold text-white"
-						>
-							제조 시작
-						</button>
-					</form>
-				</article>
-			{:else}
-				<p class="text-sm text-stone-400">대기 중인 주문이 없습니다.</p>
-			{/each}
-		</div>
-	</section>
-
-	<section>
-		<h2 class="mb-2 font-semibold text-stone-700">제조 중 ({making.length})</h2>
-		<div class="space-y-3">
-			{#each making as order (order.id)}
 				<article class="rounded-xl bg-white p-4 shadow-sm">
 					<div class="flex items-start justify-between">
 						<div>
@@ -91,12 +57,12 @@
 							type="submit"
 							class="w-full rounded-full bg-stone-900 py-2 text-sm font-semibold text-white"
 						>
-							호출
+							제작 완료
 						</button>
 					</form>
 				</article>
 			{:else}
-				<p class="text-sm text-stone-400">제조 중인 주문이 없습니다.</p>
+				<p class="text-sm text-stone-400">대기 중인 주문이 없습니다.</p>
 			{/each}
 		</div>
 	</section>

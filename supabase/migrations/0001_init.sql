@@ -1,5 +1,10 @@
 -- BOOK 다방 초기 스키마
 
+-- 이전에 중간까지만 실행되고 실패한 시도가 남긴 객체가 있으면 정리(처음 실행이면 아무 효과 없음)
+drop table if exists orders cascade;
+drop table if exists menu_items cascade;
+drop sequence if exists order_number_seq cascade;
+
 create extension if not exists pgcrypto;
 
 create table menu_items (
@@ -23,7 +28,7 @@ create table orders (
   menu_item_id uuid references menu_items(id) on delete set null,
   menu_name text not null,
   status text not null default 'pending'
-    check (status in ('pending', 'making', 'ready', 'completed')),
+    check (status in ('pending', 'ready', 'completed')),
   notified_at timestamptz,
   created_at timestamptz not null default now()
 );
