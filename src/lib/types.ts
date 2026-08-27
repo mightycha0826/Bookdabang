@@ -36,6 +36,12 @@ export interface OrderWithItems extends Order {
 	order_items: OrderItem[];
 }
 
+export interface StoreStatus {
+	id: number;
+	is_open: boolean;
+	updated_at: string;
+}
+
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
 	pending: '주문 접수',
 	making: '제조 중',

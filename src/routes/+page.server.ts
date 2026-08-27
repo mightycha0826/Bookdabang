@@ -1,21 +1,27 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { supabase } from '$lib/supabase';
-import type { MenuItem } from '$lib/types';
+import type { MenuItem, StoreStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
-	const { data, error } = await supabase
-		.from('menu_items')
-		.select('*')
-		.order('sort_order', { ascending: true })
-		.order('created_at', { ascending: true });
+	const [{ data, error }, { data: statusData }] = await Promise.all([
+		supabase
+			.from('menu_items')
+			.select('*')
+			.order('sort_order', { ascending: true })
+			.order('created_at', { ascending: true }),
+		supabase.from('store_status').select('*').eq('id', 1).single()
+	]);
 
 	if (error) {
 		console.error('메뉴 로드 실패', error);
-		return { menuItems: [] as MenuItem[] };
+		return { menuItems: [] as MenuItem[], storeOpen: true };
 	}
 
-	return { menuItems: (data ?? []) as MenuItem[] };
+	return {
+		menuItems: (data ?? []) as MenuItem[],
+		storeOpen: statusData ? (statusData as StoreStatus).is_open : true
+	};
 };
 
 interface CartLine {
@@ -25,6 +31,15 @@ interface CartLine {
 
 export const actions: Actions = {
 	order: async ({ request }) => {
+		const { data: statusData } = await supabase
+			.from('store_status')
+			.select('is_open')
+			.eq('id', 1)
+			.single();
+		if (statusData?.is_open === false) {
+			return fail(403, { message: '지금은 주문을 받지 않습니다.' });
+		}
+
 		const form = await request.formData();
 		const customerName = form.get('customerName')?.toString().trim();
 		const itemsRaw = form.get('items')?.toString();

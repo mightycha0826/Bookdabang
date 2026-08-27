@@ -4,14 +4,15 @@
 
 - 손님 페이지 (`/`): 메뉴 조회, 장바구니, 주문
 - 주문 상태 페이지 (`/order/[id]`): 실시간 주문 상태 + 관리자 "호출" 시 풀스크린 강제 알림
-- 관리자 페이지 (`/admin`): PIN 로그인, 실시간 주문 현황, 호출/완료 처리
+- 관리자 페이지 (`/admin`): PIN 로그인, 실시간 주문 현황, 호출/완료 처리, 영업 종료/시작 토글
 - 메뉴 관리 (`/admin/menu`): 메뉴 CRUD, 품절 토글
 
 ## 1. Supabase 프로젝트 준비
 
 1. [supabase.com](https://supabase.com)에서 새 프로젝트를 만든다.
 2. 프로젝트의 **SQL Editor**에서 [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) 내용을 그대로 실행한다. (테이블, RLS 정책, Realtime publication이 함께 설정됨)
-3. **Project Settings → API**에서 다음 값을 확인한다.
+3. 이어서 [`supabase/migrations/0002_store_status.sql`](supabase/migrations/0002_store_status.sql) 내용을 실행한다. (영업 상태 테이블 및 RLS, Realtime publication 추가)
+4. **Project Settings → API**에서 다음 값을 확인한다.
    - `Project URL` → `PUBLIC_SUPABASE_URL`
    - `anon public` 키 → `PUBLIC_SUPABASE_ANON_KEY`
    - `service_role` 키 → `SUPABASE_SERVICE_ROLE_KEY` (절대 외부에 노출 금지, 서버에서만 사용)

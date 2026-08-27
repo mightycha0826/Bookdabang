@@ -1,10 +1,14 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { supabase } from '$lib/supabase';
 	import MenuCard from '$lib/components/MenuCard.svelte';
 	import CartBar from '$lib/components/CartBar.svelte';
+	import type { StoreStatus } from '$lib/types';
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
 
+	let storeOpen = $state(data.storeOpen);
 	let hasTumbler = $state<boolean | null>(null);
 	let activeCategory = $state('전체');
 	let quantities = $state<Record<string, number>>({});
@@ -51,13 +55,36 @@
 		if (!quantities[id]) return;
 		quantities[id] = Math.max(0, quantities[id] - 1);
 	}
+
+	onMount(() => {
+		const channel = supabase
+			.channel('store-status')
+			.on(
+				'postgres_changes',
+				{ event: 'UPDATE', schema: 'public', table: 'store_status', filter: 'id=eq.1' },
+				(payload) => {
+					storeOpen = (payload.new as StoreStatus).is_open;
+				}
+			)
+			.subscribe();
+
+		return () => {
+			supabase.removeChannel(channel);
+		};
+	});
 </script>
 
 <svelte:head>
 	<title>BOOK 다방</title>
 </svelte:head>
 
-{#if hasTumbler === null}
+{#if !storeOpen}
+	<div class="flex min-h-dvh flex-col items-center justify-center gap-4 bg-white p-6 text-center">
+		<p class="text-sm font-medium tracking-widest text-stone-400">BOOK 다방</p>
+		<h1 class="text-xl font-bold text-stone-900">지금은 주문을 받지 않습니다</h1>
+		<p class="text-sm text-stone-500">잠시 후 다시 확인해주세요.</p>
+	</div>
+{:else if hasTumbler === null}
 	<div class="flex min-h-dvh flex-col items-center justify-center gap-10 bg-white p-6 text-center">
 		<div>
 			<p class="text-sm font-medium tracking-widest text-stone-400">BOOK 다방</p>

@@ -70,5 +70,16 @@ export const actions: Actions = {
 			.update({ status: 'completed' })
 			.eq('id', orderId);
 		if (error) return fail(500, { message: '완료 처리에 실패했습니다.' });
+	},
+
+	toggleOpen: async ({ request }) => {
+		const formData = await request.formData();
+		const isOpen = formData.get('isOpen')?.toString() === 'true';
+
+		const { error } = await supabaseAdmin
+			.from('store_status')
+			.update({ is_open: !isOpen, updated_at: new Date().toISOString() })
+			.eq('id', 1);
+		if (error) return fail(500, { message: '영업 상태 변경에 실패했습니다.' });
 	}
 };
