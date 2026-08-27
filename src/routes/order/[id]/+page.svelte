@@ -58,15 +58,15 @@
 
 	{#if order.status === 'completed'}
 		<p class="mt-6 text-center text-sm text-stone-500">수령이 완료되었습니다. 감사합니다!</p>
-		<a
-			href={resolve('/')}
-			class="mt-4 block rounded-lg bg-stone-900 py-3 text-center text-sm font-semibold text-white"
-		>
-			홈으로
-		</a>
 	{:else}
 		<p class="mt-6 text-center text-sm text-stone-500">
 			직원이 학번을 불러드리면 픽업대에서 수령해주세요.
 		</p>
 	{/if}
+	<a
+		href={resolve('/')}
+		class="mt-4 block rounded-lg bg-stone-900 py-3 text-center text-sm font-semibold text-white"
+	>
+		홈으로
+	</a>
 </div>
