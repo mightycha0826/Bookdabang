@@ -12,7 +12,8 @@
 1. [supabase.com](https://supabase.com)에서 새 프로젝트를 만든다.
 2. 프로젝트의 **SQL Editor**에서 [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) 내용을 그대로 실행한다. (테이블, RLS 정책, Realtime publication이 함께 설정됨)
 3. 이어서 [`supabase/migrations/0002_store_status.sql`](supabase/migrations/0002_store_status.sql) 내용을 실행한다. (영업 상태 테이블 및 RLS, Realtime publication 추가)
-4. **Project Settings → API**에서 다음 값을 확인한다.
+4. 마지막으로 [`supabase/migrations/0003_seed_menu.sql`](supabase/migrations/0003_seed_menu.sql) 내용을 실행한다. (초기 메뉴 3종 등록 — 가격은 임시값이므로 관리자 페이지에서 실제 가격으로 수정)
+5. **Project Settings → API**에서 다음 값을 확인한다.
    - `Project URL` → `PUBLIC_SUPABASE_URL`
    - `anon public` 키 → `PUBLIC_SUPABASE_ANON_KEY`
    - `service_role` 키 → `SUPABASE_SERVICE_ROLE_KEY` (절대 외부에 노출 금지, 서버에서만 사용)
