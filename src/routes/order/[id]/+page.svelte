@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { resolve } from '$app/paths';
 	import { supabase } from '$lib/supabase';
 	import type { Order } from '$lib/types';
 	import OrderStatusBadge from '$lib/components/OrderStatusBadge.svelte';
@@ -55,7 +56,17 @@
 		<p class="mt-1 text-lg font-semibold text-stone-900">{order.menu_name}</p>
 	</section>
 
-	<p class="mt-6 text-center text-sm text-stone-500">
-		직원이 학번을 불러드리면 픽업대에서 수령해주세요.
-	</p>
+	{#if order.status === 'completed'}
+		<p class="mt-6 text-center text-sm text-stone-500">수령이 완료되었습니다. 감사합니다!</p>
+		<a
+			href={resolve('/')}
+			class="mt-4 block rounded-lg bg-stone-900 py-3 text-center text-sm font-semibold text-white"
+		>
+			홈으로
+		</a>
+	{:else}
+		<p class="mt-6 text-center text-sm text-stone-500">
+			직원이 학번을 불러드리면 픽업대에서 수령해주세요.
+		</p>
+	{/if}
 </div>
