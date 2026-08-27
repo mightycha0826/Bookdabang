@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { supabase } from '$lib/supabase';
+import { supabaseAdmin } from '$lib/server/supabaseAdmin';
 import type { MenuItem, StoreStatus } from '$lib/types';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -129,7 +130,7 @@ export const actions: Actions = {
 			}
 		}
 
-		const { data: order, error: orderError } = await supabase
+		const { data: order, error: orderError } = await supabaseAdmin
 			.from('orders')
 			.update({
 				status: 'pending',
