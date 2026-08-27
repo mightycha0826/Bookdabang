@@ -40,9 +40,9 @@
 	<header class="py-6 text-center">
 		<p class="text-sm text-stone-500">픽업 번호</p>
 		<p class="text-4xl font-extrabold text-stone-900">#{order.order_number}</p>
-		<p class="mt-2 text-stone-600">학번 {order.student_id}</p>
+		<p class="mt-2 text-stone-600">{order.table_number}번 테이블 · {order.name}님</p>
 		<p class="mt-1 text-xs text-stone-400">
-			{order.has_tumbler ? '개인 텀블러 사용' : '일회용 컵 사용'}
+			학번 {order.student_id} · {order.has_tumbler ? '개인 텀블러 사용' : '일회용 컵 사용'}
 		</p>
 	</header>
 

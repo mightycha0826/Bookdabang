@@ -15,6 +15,8 @@ export interface Order {
 	id: string;
 	order_number: number;
 	student_id: string;
+	name: string;
+	table_number: number;
 	has_tumbler: boolean;
 	menu_item_id: string | null;
 	menu_name: string;

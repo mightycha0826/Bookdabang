@@ -100,10 +100,14 @@
 				</div>
 				<button
 					type="button"
-					onclick={() => (hasTumbler = null)}
+					onclick={() => {
+						hasTumbler = null;
+						selectedItemId = null;
+						activeCategory = '전체';
+					}}
 					class="rounded-full border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600"
 				>
-					{hasTumbler ? '개인 텀블러' : '일회용 컵'} · 변경
+					처음으로
 				</button>
 			</div>
 

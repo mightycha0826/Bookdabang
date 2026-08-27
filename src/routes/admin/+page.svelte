@@ -41,8 +41,9 @@
 				<article class="rounded-xl bg-white p-4 shadow-sm">
 					<div class="flex items-start justify-between">
 						<div>
-							<p class="font-bold text-stone-900">
-								#{order.order_number} · 학번 {order.student_id}
+							<p class="text-lg font-extrabold text-stone-900">{order.table_number}번 테이블</p>
+							<p class="text-sm text-stone-600">
+								#{order.order_number} · {order.name} (학번 {order.student_id})
 							</p>
 							<p class="text-xs text-stone-400">
 								{timeLabel(order.created_at)} · {order.has_tumbler ? '텀블러' : '일회용 컵'}
@@ -74,8 +75,9 @@
 				<article class="rounded-xl bg-white p-4 shadow-sm">
 					<div class="flex items-start justify-between">
 						<div>
-							<p class="font-bold text-stone-900">
-								#{order.order_number} · 학번 {order.student_id}
+							<p class="text-lg font-extrabold text-stone-900">{order.table_number}번 테이블</p>
+							<p class="text-sm text-stone-600">
+								#{order.order_number} · {order.name} (학번 {order.student_id})
 							</p>
 							<p class="text-xs text-stone-400">
 								{timeLabel(order.created_at)} · {order.has_tumbler ? '텀블러' : '일회용 컵'}
@@ -118,7 +120,8 @@
 		<div class="mt-2 space-y-2">
 			{#each data.completed as order (order.id)}
 				<div class="rounded-lg bg-white px-3 py-2 text-sm text-stone-500">
-					#{order.order_number} · 학번 {order.student_id} · {order.menu_name}
+					{order.table_number}번 테이블 · #{order.order_number} · {order.name} (학번 {order.student_id})
+					· {order.menu_name}
 				</div>
 			{/each}
 		</div>

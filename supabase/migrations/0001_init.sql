@@ -24,6 +24,8 @@ create table orders (
   id uuid primary key default gen_random_uuid(),
   order_number integer not null default nextval('order_number_seq'),
   student_id text not null check (student_id ~ '^\d{5}$'),
+  name text not null,
+  table_number integer not null check (table_number between 1 and 10),
   has_tumbler boolean not null default false,
   menu_item_id uuid references menu_items(id) on delete set null,
   menu_name text not null,

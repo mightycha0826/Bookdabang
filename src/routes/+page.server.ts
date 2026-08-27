@@ -37,11 +37,20 @@ export const actions: Actions = {
 
 		const form = await request.formData();
 		const studentId = form.get('studentId')?.toString().trim();
+		const name = form.get('name')?.toString().trim();
+		const tableNumberRaw = form.get('tableNumber')?.toString();
+		const tableNumber = Number(tableNumberRaw);
 		const menuItemId = form.get('menuItemId')?.toString();
 		const hasTumbler = form.get('hasTumbler')?.toString() === 'true';
 
 		if (!studentId || !/^\d{5}$/.test(studentId)) {
 			return fail(400, { message: '학번 5자리를 정확히 입력해주세요.' });
+		}
+		if (!name) {
+			return fail(400, { message: '이름을 입력해주세요.' });
+		}
+		if (!tableNumberRaw || !Number.isInteger(tableNumber) || tableNumber < 1 || tableNumber > 10) {
+			return fail(400, { message: '테이블 번호를 선택해주세요.' });
 		}
 		if (!menuItemId) {
 			return fail(400, { message: '음료를 선택해주세요.' });
@@ -64,6 +73,8 @@ export const actions: Actions = {
 			.from('orders')
 			.insert({
 				student_id: studentId,
+				name,
+				table_number: tableNumber,
 				has_tumbler: hasTumbler,
 				menu_item_id: menuItem.id,
 				menu_name: menuItem.name
