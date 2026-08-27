@@ -62,7 +62,7 @@
 					type="text"
 					bind:value={studentId}
 					inputmode="numeric"
-					pattern="[0-9]{5}"
+					pattern={'[0-9]{5}'}
 					maxlength="5"
 					autocomplete="off"
 					required
