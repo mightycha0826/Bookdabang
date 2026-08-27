@@ -27,11 +27,12 @@
 	}
 
 	let refillDialogOpen = $state(false);
-	let refillStep = $state<'table' | 'result'>('table');
+	let refillStep = $state<'table' | 'people' | 'result'>('table');
 	let refillSearchInput = $state('');
 	let refillSearchError = $state('');
 	let refillTableNumber = $state<number | null>(null);
 	let lookupLoading = $state(false);
+	let tablePeople = $state<Order[]>([]);
 	let previousOrder = $state<Order | null>(null);
 	let refillCount = $state(0);
 	let refillSubmitting = $state(false);
@@ -42,6 +43,7 @@
 		refillSearchInput = '';
 		refillSearchError = '';
 		refillTableNumber = null;
+		tablePeople = [];
 		previousOrder = null;
 		refillCount = 0;
 	}
@@ -52,6 +54,7 @@
 		refillSearchInput = '';
 		refillSearchError = '';
 		refillTableNumber = null;
+		tablePeople = [];
 		previousOrder = null;
 		refillCount = 0;
 	}
@@ -74,23 +77,31 @@
 			.from('orders')
 			.select('*')
 			.eq('table_number', n)
-			.order('created_at', { ascending: false })
-			.limit(1);
+			.order('created_at', { ascending: false });
 
-		previousOrder = (rows?.[0] as Order | undefined) ?? null;
-
-		if (previousOrder) {
-			const { data: refillRows } = await supabase
-				.from('orders')
-				.select('id')
-				.eq('table_number', n)
-				.eq('is_refill', true);
-			refillCount = refillRows?.length ?? 0;
-		} else {
-			refillCount = 0;
+		const people: Order[] = [];
+		for (const row of (rows as Order[] | null) ?? []) {
+			if (!people.some((p) => p.student_id === row.student_id)) {
+				people.push(row);
+			}
 		}
+		tablePeople = people;
 
 		lookupLoading = false;
+		refillStep = people.length > 0 ? 'people' : 'result';
+	}
+
+	async function selectPerson(order: Order) {
+		previousOrder = order;
+
+		const { data: refillRows } = await supabase
+			.from('orders')
+			.select('id')
+			.eq('table_number', order.table_number)
+			.eq('student_id', order.student_id)
+			.eq('is_refill', true);
+		refillCount = refillRows?.length ?? 0;
+
 		refillStep = 'result';
 	}
 </script>
@@ -278,6 +289,30 @@
 				>
 					취소
 				</button>
+			{:else if refillStep === 'people'}
+				<h2 class="text-base font-bold text-stone-900">{refillTableNumber}번 테이블</h2>
+				<p class="mt-1 text-sm text-stone-500">본인의 이름을 찾아 선택해주세요.</p>
+
+				<div class="mt-4 space-y-2">
+					{#each tablePeople as person (person.id)}
+						<button
+							type="button"
+							onclick={() => selectPerson(person)}
+							class="w-full rounded-lg border border-stone-300 p-3 text-left"
+						>
+							<p class="font-semibold text-stone-900">{person.name}님</p>
+							<p class="text-sm text-stone-500">{person.menu_name}</p>
+						</button>
+					{/each}
+				</div>
+
+				<button
+					type="button"
+					onclick={() => (refillStep = 'table')}
+					class="mt-4 w-full rounded-lg border border-stone-300 py-3 text-sm font-medium text-stone-700"
+				>
+					다른 테이블 검색
+				</button>
 			{:else if previousOrder}
 				<h2 class="text-base font-bold text-stone-900">{refillTableNumber}번 테이블 이전 주문</h2>
 
@@ -310,7 +345,7 @@
 					<div class="mt-4 flex gap-2">
 						<button
 							type="button"
-							onclick={() => (refillStep = 'table')}
+							onclick={() => (refillStep = 'people')}
 							class="flex-1 rounded-lg border border-stone-300 py-3 text-sm font-medium text-stone-700"
 						>
 							뒤로
