@@ -39,7 +39,7 @@
 		<div class="space-y-3">
 			{#each pending as order (order.id)}
 				<article
-					class="rounded-xl p-4 shadow-sm {order.is_refill
+					class="rounded-xl p-4 shadow-sm {order.refill_count > 0
 						? 'border-2 border-green-500 bg-green-50'
 						: 'bg-white'}"
 				>
@@ -47,9 +47,9 @@
 						<div>
 							<div class="flex items-center gap-2">
 								<p class="text-lg font-extrabold text-stone-900">{order.table_number}번 테이블</p>
-								{#if order.is_refill}
+								{#if order.refill_count > 0}
 									<span class="rounded-full bg-green-600 px-2 py-0.5 text-xs font-bold text-white">
-										리필
+										리필 {order.refill_count}회
 									</span>
 								{/if}
 							</div>
@@ -84,7 +84,7 @@
 		<div class="space-y-3">
 			{#each ready as order (order.id)}
 				<article
-					class="rounded-xl p-4 shadow-sm {order.is_refill
+					class="rounded-xl p-4 shadow-sm {order.refill_count > 0
 						? 'border-2 border-green-500 bg-green-50'
 						: 'bg-white'}"
 				>
@@ -92,9 +92,9 @@
 						<div>
 							<div class="flex items-center gap-2">
 								<p class="text-lg font-extrabold text-stone-900">{order.table_number}번 테이블</p>
-								{#if order.is_refill}
+								{#if order.refill_count > 0}
 									<span class="rounded-full bg-green-600 px-2 py-0.5 text-xs font-bold text-white">
-										리필
+										리필 {order.refill_count}회
 									</span>
 								{/if}
 							</div>
@@ -143,7 +143,7 @@
 			{#each data.completed as order (order.id)}
 				<div class="rounded-lg bg-white px-3 py-2 text-sm text-stone-500">
 					{order.table_number}번 테이블 · #{order.order_number} · {order.name} (학번 {order.student_id})
-					· {order.menu_name}{order.is_refill ? ' · 리필' : ''}
+					· {order.menu_name}{order.refill_count > 0 ? ` · 리필 ${order.refill_count}회` : ''}
 				</div>
 			{/each}
 		</div>

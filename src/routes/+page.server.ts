@@ -131,21 +131,18 @@ export const actions: Actions = {
 
 		const { data: order, error: orderError } = await supabase
 			.from('orders')
-			.insert({
-				student_id: previousOrder.student_id,
-				name: previousOrder.name,
-				table_number: previousOrder.table_number,
-				has_tumbler: previousOrder.has_tumbler,
-				menu_item_id: previousOrder.menu_item_id,
-				menu_name: previousOrder.menu_name,
-				is_refill: true
+			.update({
+				status: 'pending',
+				notified_at: null,
+				refill_count: previousOrder.refill_count + 1
 			})
+			.eq('id', previousOrder.id)
 			.select()
 			.single();
 
 		if (orderError || !order) {
-			console.error('리필 주문 생성 실패', orderError);
-			return fail(500, { message: '리필 주문을 생성하지 못했습니다. 다시 시도해주세요.' });
+			console.error('리필 처리 실패', orderError);
+			return fail(500, { message: '리필 처리를 하지 못했습니다. 다시 시도해주세요.' });
 		}
 
 		throw redirect(303, `/order/${order.id}`);

@@ -89,17 +89,9 @@
 		return new Date(iso).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
 	}
 
-	async function selectPerson(order: Order) {
+	function selectPerson(order: Order) {
 		previousOrder = order;
-
-		const { data: refillRows } = await supabase
-			.from('orders')
-			.select('id')
-			.eq('table_number', order.table_number)
-			.eq('student_id', order.student_id)
-			.eq('is_refill', true);
-		refillCount = refillRows?.length ?? 0;
-
+		refillCount = order.refill_count;
 		refillStep = 'result';
 	}
 </script>
@@ -294,11 +286,11 @@
 						>
 							<div class="flex items-center gap-2">
 								<p class="font-semibold text-stone-900">{order.name}님</p>
-								{#if order.is_refill}
+								{#if order.refill_count > 0}
 									<span
 										class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700"
 									>
-										리필
+										리필 {order.refill_count}회
 									</span>
 								{/if}
 							</div>

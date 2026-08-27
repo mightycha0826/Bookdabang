@@ -54,11 +54,11 @@
 	<section class="mt-6 rounded-xl bg-white p-4 text-center">
 		<p class="text-sm text-stone-500">주문 음료</p>
 		<p class="mt-1 text-lg font-semibold text-stone-900">{order.menu_name}</p>
-		{#if order.is_refill}
+		{#if order.refill_count > 0}
 			<p
 				class="mt-2 inline-block rounded-full bg-green-100 px-3 py-0.5 text-xs font-semibold text-green-700"
 			>
-				리필 주문
+				리필 {order.refill_count}회
 			</p>
 		{/if}
 	</section>
