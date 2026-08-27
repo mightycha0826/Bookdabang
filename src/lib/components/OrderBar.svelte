@@ -32,7 +32,7 @@
 	let refillSearchError = $state('');
 	let refillTableNumber = $state<number | null>(null);
 	let lookupLoading = $state(false);
-	let tablePeople = $state<Order[]>([]);
+	let tableOrders = $state<Order[]>([]);
 	let previousOrder = $state<Order | null>(null);
 	let refillCount = $state(0);
 	let refillSubmitting = $state(false);
@@ -43,7 +43,7 @@
 		refillSearchInput = '';
 		refillSearchError = '';
 		refillTableNumber = null;
-		tablePeople = [];
+		tableOrders = [];
 		previousOrder = null;
 		refillCount = 0;
 	}
@@ -54,7 +54,7 @@
 		refillSearchInput = '';
 		refillSearchError = '';
 		refillTableNumber = null;
-		tablePeople = [];
+		tableOrders = [];
 		previousOrder = null;
 		refillCount = 0;
 	}
@@ -79,16 +79,14 @@
 			.eq('table_number', n)
 			.order('created_at', { ascending: false });
 
-		const people: Order[] = [];
-		for (const row of (rows as Order[] | null) ?? []) {
-			if (!people.some((p) => p.student_id === row.student_id)) {
-				people.push(row);
-			}
-		}
-		tablePeople = people;
+		tableOrders = (rows as Order[] | null) ?? [];
 
 		lookupLoading = false;
-		refillStep = people.length > 0 ? 'people' : 'result';
+		refillStep = tableOrders.length > 0 ? 'people' : 'result';
+	}
+
+	function timeLabel(iso: string) {
+		return new Date(iso).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
 	}
 
 	async function selectPerson(order: Order) {
@@ -291,17 +289,28 @@
 				</button>
 			{:else if refillStep === 'people'}
 				<h2 class="text-base font-bold text-stone-900">{refillTableNumber}번 테이블</h2>
-				<p class="mt-1 text-sm text-stone-500">본인의 이름을 찾아 선택해주세요.</p>
+				<p class="mt-1 text-sm text-stone-500">지금까지 주문한 내역에서 본인 것을 선택해주세요.</p>
 
-				<div class="mt-4 space-y-2">
-					{#each tablePeople as person (person.id)}
+				<div class="mt-4 max-h-80 space-y-2 overflow-y-auto">
+					{#each tableOrders as order (order.id)}
 						<button
 							type="button"
-							onclick={() => selectPerson(person)}
+							onclick={() => selectPerson(order)}
 							class="w-full rounded-lg border border-stone-300 p-3 text-left"
 						>
-							<p class="font-semibold text-stone-900">{person.name}님</p>
-							<p class="text-sm text-stone-500">{person.menu_name}</p>
+							<div class="flex items-center gap-2">
+								<p class="font-semibold text-stone-900">{order.name}님</p>
+								{#if order.is_refill}
+									<span
+										class="rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700"
+									>
+										리필
+									</span>
+								{/if}
+							</div>
+							<p class="text-sm text-stone-500">
+								{order.menu_name} · {timeLabel(order.created_at)}
+							</p>
 						</button>
 					{/each}
 				</div>
