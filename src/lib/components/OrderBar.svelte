@@ -28,6 +28,8 @@
 
 	let refillDialogOpen = $state(false);
 	let refillStep = $state<'table' | 'result'>('table');
+	let refillSearchInput = $state('');
+	let refillSearchError = $state('');
 	let refillTableNumber = $state<number | null>(null);
 	let lookupLoading = $state(false);
 	let previousOrder = $state<Order | null>(null);
@@ -37,6 +39,8 @@
 	function openRefillDialog() {
 		refillDialogOpen = true;
 		refillStep = 'table';
+		refillSearchInput = '';
+		refillSearchError = '';
 		refillTableNumber = null;
 		previousOrder = null;
 		refillCount = 0;
@@ -45,9 +49,21 @@
 	function closeRefillDialog() {
 		refillDialogOpen = false;
 		refillStep = 'table';
+		refillSearchInput = '';
+		refillSearchError = '';
 		refillTableNumber = null;
 		previousOrder = null;
 		refillCount = 0;
+	}
+
+	function submitTableSearch() {
+		const n = Number(refillSearchInput);
+		if (!Number.isInteger(n) || n < 1 || n > 10) {
+			refillSearchError = '1~10 사이의 테이블 번호를 입력해주세요.';
+			return;
+		}
+		refillSearchError = '';
+		lookupTable(n);
 	}
 
 	async function lookupTable(n: number) {
@@ -222,26 +238,43 @@
 	<div class="fixed inset-0 z-40 flex items-end justify-center bg-black/40 sm:items-center">
 		<div class="w-full max-w-sm rounded-t-2xl bg-white p-5 sm:rounded-2xl">
 			{#if refillStep === 'table'}
-				<h2 class="text-base font-bold text-stone-900">리필 · 테이블 번호 선택</h2>
-				<p class="mt-1 text-sm text-stone-500">이전에 주문하셨던 테이블 번호를 선택해주세요.</p>
+				<h2 class="text-base font-bold text-stone-900">리필 · 테이블 번호 검색</h2>
+				<p class="mt-1 text-sm text-stone-500">이전에 주문하셨던 테이블 번호를 입력해주세요.</p>
 
-				<div class="mt-4 grid grid-cols-5 gap-2">
-					{#each Array.from({ length: 10 }, (_, i) => i + 1) as n (n)}
-						<button
-							type="button"
-							disabled={lookupLoading}
-							onclick={() => lookupTable(n)}
-							class="rounded-lg border border-stone-300 py-3 text-sm font-semibold text-stone-700 disabled:opacity-50"
-						>
-							{n}
-						</button>
-					{/each}
-				</div>
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						submitTableSearch();
+					}}
+				>
+					<input
+						type="text"
+						bind:value={refillSearchInput}
+						inputmode="numeric"
+						pattern="[0-9]*"
+						maxlength="2"
+						autocomplete="off"
+						placeholder="테이블 번호 (1~10)"
+						class="mt-4 w-full rounded-lg border border-stone-300 px-3 py-2 text-center text-lg tracking-widest focus:border-stone-500 focus:outline-none"
+					/>
+
+					{#if refillSearchError}
+						<p class="mt-2 text-center text-sm text-red-600">{refillSearchError}</p>
+					{/if}
+
+					<button
+						type="submit"
+						disabled={lookupLoading}
+						class="mt-3 w-full rounded-lg bg-green-600 py-3 text-sm font-semibold text-white disabled:opacity-50"
+					>
+						{lookupLoading ? '검색 중...' : '검색'}
+					</button>
+				</form>
 
 				<button
 					type="button"
 					onclick={closeRefillDialog}
-					class="mt-4 w-full rounded-lg border border-stone-300 py-3 text-sm font-medium text-stone-700"
+					class="mt-2 w-full rounded-lg border border-stone-300 py-3 text-sm font-medium text-stone-700"
 				>
 					취소
 				</button>
